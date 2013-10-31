@@ -1,6 +1,6 @@
 
-//**********************************************************
-/* 	NOTE: Before running > gpio load spi						
+/* **********************************************************
+	NOTE: Before running > gpio load spi						
 					
 	Module pin								Raspberry pin	wiringPI#	
  
@@ -18,14 +18,14 @@
 	17 Backlight Led+ (requires external bias) 				
 	18 Backlight Led-                      		   6	
 							  
-//***************Function Descriptions**********************
+   ***************Function Descriptions**********************
 								  											  
 	digitalwrite(pin,value)								  
 	pinMode(pin,direction)								  
 	wiringPiSPIDataRW (channel, data, int length)
-	wiringPiSPISetup (channel,speed)					  */
+	wiringPiSPISetup (channel,speed)					  
 
-//***********************Librarys***************************
+  ***********************Librarys************************* */
 
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
@@ -35,6 +35,7 @@
 #include <errno.h>
 #include <string.h>
 #include "font5x7int.h"
+#include "font10x14int.h"
 	
 //*****************Prototype Functions**********************
 	
@@ -45,35 +46,25 @@
 	
 //***************Global Variables/Constants*****************
 	
-	uint8_t spiData [10];
+	uint8_t spiData [10]; // uint8_t = 8 bit unsign variable (byte)
 	
 //*******************Main Functions*************************
 	
 int main(void)
 {
 
-	InitPi();								// Initilise the Pi
-	write_cmd(175);							// display on
-	write_cmd(167);							// reverse
-	write_cmd(226);							// reset display
-	write_cmd(47); 							// power control
-	write_cmd(179); 						// set row (180-row)
-	write_cmd(163); 						// LCD bias select
-	delayMicroseconds (100);
+	InitPi();								// Initilise the Pi & LCD
 
 	//Write text/graphics to display
 
-	gotoxy(179,16);							//row 1, column 0
-	write_str("Green Piece");
-	
-	gotoxy(178,16);							//row 2, column 0
-	write_str(" ");
-
-	gotoxy(177,16);							//row 3, column 0
-	write_str("Mystery Machines");
-
-	gotoxy(176,16);							//row 4, column 0
-	write_str(" ");
+	gotoxy(179,16);							// row 1, column 0
+	write_str("Green Pieces");	
+	gotoxy(178,16);							// row 2, column 0
+	write_str("");
+	gotoxy(177,16);							// row 3, column 0
+	write_str("Mystery Machine");
+	gotoxy(176,16);							// row 4, column 0
+	write_str("Electric Racing Series");
 
 	return 0;
 }
@@ -85,6 +76,7 @@ void InitPi(void)	// Initilises the Pi & LCD (inc. pins, speed etc)
 		fprintf (stderr, "Unable to open SPI device 0: %s\n", strerror (errno)) ;
 		exit (1) ;
 		}
+		
 	wiringPiSetupSys();
 	wiringPiSetup();
 	
@@ -92,31 +84,44 @@ void InitPi(void)	// Initilises the Pi & LCD (inc. pins, speed etc)
 	pinMode(9, OUTPUT); 				// cmd pin = output
 
 	digitalWrite(8,0);					// resets the LCD
-	delayMicroseconds(200);
+	delayMicroseconds(100);
 	digitalWrite(8,1);					// initilises the LCD
+	
+	//*************Control & Display Commands*******************
+	
+	write_cmd(175);			// LCD Display Reg (175 = on, 174 = off)
+	write_cmd(166);			// Reverse Reg (166, 167 = reverse colors)
+	write_cmd(226);			// Reset Reg (226 Resets display)
+	write_cmd(47); 			// Power Control Reg (47 = all on)
+	write_cmd(179); 		// Set row (180-row)
+	write_cmd(163); 		// LCD bias Reg (162 = 1/7, 163 = 1/9)
+	
+	write_cmd(173);			// Static Indic Mode (173 = on, 172 = off)
+	write_cmd(2);			// Static Indic Reg (1 = 1sec, 2 = 0.5sec)
+	delayMicroseconds(100);
 	}
 
 void write_cmd(int i)		// Sends command to LCD Controller
 	{
 	digitalWrite(9,0); 					// Activate control mode
 	spiData[0]=i;
-	wiringPiSPIDataRW (0, spiData, 1) ;
+	wiringPiSPIDataRW (0, spiData, 1);
 	}
 	
 void gotoxy(int x,int y)	// Sends x & y co-ordinates to LCD
 	{
 	digitalWrite(9,0); 					// Activate control mode
 	spiData[0]=x;
-	wiringPiSPIDataRW (0, spiData, 1) ;
+	wiringPiSPIDataRW (0, spiData, 1);
 	spiData[0]=y;
-	wiringPiSPIDataRW (0, spiData, 1) ;
+	wiringPiSPIDataRW (0, spiData, 1);
 	}
 	
 void write_char(char Char)  // 
 	{
 	int c;
 	digitalWrite(9,1); 					// Activate control mode
-	for(c=0;c<=5;c++)					// font set is 5 bits wide
+	for(c=0;c<=5;c++)					// Font is 5 bits wide
 		{
 		spiData[c]=(font5x7int[Char*5+c]);
 		}	
