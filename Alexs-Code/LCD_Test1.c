@@ -25,7 +25,7 @@
 	wiringPiSPIDataRW (channel, data, int length)
 	wiringPiSPISetup (channel,speed)					  
 
-  ***********************Librarys************************* */
+  ***********************Library's************************* */
 
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
@@ -53,7 +53,7 @@
 int main(void)
 {
 
-	InitPi();								// Initilise the Pi & LCD
+	InitPi();								// Initialise the Pi & LCD
 
 	//Write text/graphics to display
 
@@ -69,7 +69,7 @@ int main(void)
 	return 0;
 }
 
-void InitPi(void)	// Initilises the Pi & LCD (inc. pins, speed etc)
+void InitPi(void)	// Initialises the Pi & LCD (inc. pins, speed etc)
 	{
 	if (wiringPiSPISetup (0,100000) < 0)
 		{
@@ -85,12 +85,12 @@ void InitPi(void)	// Initilises the Pi & LCD (inc. pins, speed etc)
 
 	digitalWrite(8,0);					// resets the LCD
 	delayMicroseconds(100);
-	digitalWrite(8,1);					// initilises the LCD
+	digitalWrite(8,1);					// initialises the LCD
 	
 	//*************Control & Display Commands*******************
 	
 	write_cmd(175);			// LCD Display Reg (175 = on, 174 = off)
-	write_cmd(166);			// Reverse Reg (166, 167 = reverse colors)
+	write_cmd(166);			// Reverse Reg (166, 167 = reverse colours)
 	write_cmd(226);			// Reset Reg (226 Resets display)
 	write_cmd(47); 			// Power Control Reg (47 = all on)
 	write_cmd(179); 		// Set row (180-row)
